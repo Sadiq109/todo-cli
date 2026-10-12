@@ -9,7 +9,7 @@ I built this small command-line to-do list in Python. Tasks have priorities, opt
 - `add`, `list`, `done`, `undo`, `remove` and `clear` commands
 - Priorities (`low`, `medium`, `high`), due dates with overdue warnings, and tags
 - The list is sorted by open vs. done, then priority, then due date
-- Stable task ids that are never reused
+- Stable task ids that are never reused, even after you remove the newest task
 - Atomic saves: the file is written to a temp file first and then swapped in, so a crash can't leave half a file
 - Clear error messages and a non-zero exit code for bad ids, bad dates or a corrupt file
 - No dependencies outside the standard library, plus tests and CI on Python 3.10 and 3.12

@@ -53,6 +53,7 @@ class TaskStore:
     def __init__(self, path: Path):
         self.path = Path(path)
         self.tasks: list[Task] = []
+        self.next_id = 1
         self._load()
 
     def _load(self) -> None:
@@ -61,12 +62,17 @@ class TaskStore:
         try:
             raw = json.loads(self.path.read_text(encoding="utf-8"))
             self.tasks = [Task(**item) for item in raw.get("tasks", [])]
+            stored = raw.get("next_id", 1)
+            if not isinstance(stored, int) or isinstance(stored, bool):
+                raise TypeError("next_id must be an integer")
+            # Older files have no next_id; never go below the highest id in use.
+            self.next_id = max(stored, max((t.id for t in self.tasks), default=0) + 1)
         except (json.JSONDecodeError, TypeError, AttributeError) as exc:
             raise TodoError(f"could not read {self.path}: {exc}") from None
 
     def save(self) -> None:
         self.path.parent.mkdir(parents=True, exist_ok=True)
-        data = {"tasks": [asdict(t) for t in self.tasks]}
+        data = {"next_id": self.next_id, "tasks": [asdict(t) for t in self.tasks]}
         fd, tmp = tempfile.mkstemp(dir=self.path.parent, prefix=".todo-", suffix=".json")
         with os.fdopen(fd, "w", encoding="utf-8") as fh:
             json.dump(data, fh, indent=2)
@@ -74,7 +80,9 @@ class TaskStore:
         os.replace(tmp, self.path)
 
     def _next_id(self) -> int:
-        return max((t.id for t in self.tasks), default=0) + 1
+        task_id = max(self.next_id, max((t.id for t in self.tasks), default=0) + 1)
+        self.next_id = task_id + 1
+        return task_id
 
     def get(self, task_id: int) -> Task:
         for task in self.tasks:

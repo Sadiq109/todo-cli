@@ -25,9 +25,9 @@ def test_ids_are_not_reused_after_remove(store):
     store.add("one")
     store.add("two")
     store.remove(2)
-    assert store.add("three").id == 2
+    assert store.add("three").id == 3
     store.remove(1)
-    assert store.add("four").id == 3
+    assert store.add("four").id == 4
 
 
 def test_rejects_empty_title_bad_priority_and_bad_date(store):
