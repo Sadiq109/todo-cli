@@ -110,6 +110,31 @@ class TaskStore:
         task.done = done
         return task
 
+    def edit(self, task_id: int, title: str | None = None, priority: str | None = None,
+             due: str | None = None, clear_due: bool = False,
+             tags: list[str] | None = None) -> Task:
+        """Change only the fields given. Everything is validated before anything is changed."""
+        task = self.get(task_id)
+        if title is not None:
+            title = title.strip()
+            if not title:
+                raise TodoError("task title cannot be empty")
+        if due is not None and clear_due:
+            raise TodoError("use either --due or --clear-due, not both")
+        new_priority = validate_priority(priority) if priority is not None else None
+        new_due = validate_due(due)
+        if title is not None:
+            task.title = title
+        if new_priority is not None:
+            task.priority = new_priority
+        if new_due is not None:
+            task.due = new_due
+        if clear_due:
+            task.due = None
+        if tags is not None:
+            task.tags = sorted({t.strip().lower() for t in tags if t.strip()})
+        return task
+
     def remove(self, task_id: int) -> Task:
         task = self.get(task_id)
         self.tasks.remove(task)

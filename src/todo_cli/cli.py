@@ -39,6 +39,15 @@ def build_parser() -> argparse.ArgumentParser:
     ls.add_argument("-a", "--all", action="store_true", help="include completed tasks")
     ls.add_argument("-t", "--tag", help="only tasks with this tag")
 
+    ed = sub.add_parser("edit", help="change a task's title, priority, due date or tags")
+    ed.add_argument("id", type=int)
+    ed.add_argument("--title", help="new title")
+    ed.add_argument("-p", "--priority", choices=PRIORITIES)
+    ed.add_argument("-d", "--due", help="new due date, YYYY-MM-DD")
+    ed.add_argument("--clear-due", action="store_true", help="remove the due date")
+    ed.add_argument("-t", "--tag", action="append", help="replace tags with these (repeatable)")
+    ed.add_argument("--clear-tags", action="store_true", help="remove all tags")
+
     for name, help_text in (("done", "mark a task complete"), ("undo", "mark a task not complete"),
                             ("remove", "delete a task")):
         p = sub.add_parser(name, help=help_text)
@@ -63,6 +72,15 @@ def run(argv: list[str] | None = None) -> int:
                 print("No tasks. Add one with: todo add \"Buy groceries\"")
             for task in tasks:
                 print(format_task(task))
+        elif args.command == "edit":
+            if args.tag and args.clear_tags:
+                raise TodoError("use either --tag or --clear-tags, not both")
+            tags = [] if args.clear_tags else args.tag
+            if all(v is None or v is False for v in (args.title, args.priority, args.due, args.clear_due, tags)) and tags != []:
+                raise TodoError("nothing to change; give --title, --priority, --due, --clear-due, --tag or --clear-tags")
+            task = store.edit(args.id, args.title, args.priority, args.due, args.clear_due, tags)
+            store.save()
+            print(f"Updated task {task.id}: {task.title}")
         elif args.command in ("done", "undo"):
             task = store.set_done(args.id, args.command == "done")
             store.save()
