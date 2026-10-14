@@ -44,6 +44,8 @@ Cleared 1 completed task.
 
 `edit` changes only the fields you give and checks them all first, so a bad date never leaves a half-edited task. `--clear-due` removes the due date, `-t` replaces the tags, and `--clear-tags` removes them.
 
+`list --overdue` shows open tasks past their due date, and `list --due-before 2026-11-01` shows tasks due before that day (the day itself is excluded; tasks with no due date never match). They combine with `--tag` and `--all`.
+
 Tasks are stored in `~/.todo.json` by default. Use `--file path.json` or set `TODO_FILE` to point somewhere else.
 
 ## Tests

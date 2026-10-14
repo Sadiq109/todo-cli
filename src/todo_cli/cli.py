@@ -38,6 +38,8 @@ def build_parser() -> argparse.ArgumentParser:
     ls = sub.add_parser("list", help="list tasks")
     ls.add_argument("-a", "--all", action="store_true", help="include completed tasks")
     ls.add_argument("-t", "--tag", help="only tasks with this tag")
+    ls.add_argument("--overdue", action="store_true", help="only open tasks past their due date")
+    ls.add_argument("--due-before", metavar="YYYY-MM-DD", help="only tasks due before this date")
 
     ed = sub.add_parser("edit", help="change a task's title, priority, due date or tags")
     ed.add_argument("id", type=int)
@@ -67,9 +69,12 @@ def run(argv: list[str] | None = None) -> int:
             store.save()
             print(f"Added task {task.id}: {task.title}")
         elif args.command == "list":
-            tasks = store.query(show_done=args.all, tag=args.tag)
+            tasks = store.query(show_done=args.all, tag=args.tag, overdue=args.overdue, due_before=args.due_before)
             if not tasks:
-                print("No tasks. Add one with: todo add \"Buy groceries\"")
+                if args.overdue or args.due_before:
+                    print("No matching tasks.")
+                else:
+                    print("No tasks. Add one with: todo add \"Buy groceries\"")
             for task in tasks:
                 print(format_task(task))
         elif args.command == "edit":

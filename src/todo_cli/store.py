@@ -145,10 +145,18 @@ class TaskStore:
         self.tasks = [t for t in self.tasks if not t.done]
         return before - len(self.tasks)
 
-    def query(self, show_done: bool = False, tag: str | None = None) -> list[Task]:
+    def query(self, show_done: bool = False, tag: str | None = None,
+              overdue: bool = False, due_before: str | None = None,
+              today: date | None = None) -> list[Task]:
         """Open tasks first, then by priority (high first), due date, and id."""
         rank = {p: i for i, p in enumerate(reversed(PRIORITIES))}
         items = [t for t in self.tasks if show_done or not t.done]
         if tag:
             items = [t for t in items if tag.lower() in t.tags]
+        if overdue:
+            items = [t for t in items if t.is_overdue(today)]
+        if due_before is not None:
+            cutoff = validate_due(due_before)
+            # Tasks with no due date never match; the cutoff day itself is excluded.
+            items = [t for t in items if t.due and t.due < cutoff]
         return sorted(items, key=lambda t: (t.done, rank[t.priority], t.due or "9999-12-31", t.id))
