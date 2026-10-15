@@ -3,8 +3,10 @@
 from __future__ import annotations
 
 import argparse
+import json
 import os
 import sys
+from dataclasses import asdict
 from pathlib import Path
 
 from . import __version__
@@ -38,6 +40,7 @@ def build_parser() -> argparse.ArgumentParser:
     ls = sub.add_parser("list", help="list tasks")
     ls.add_argument("-a", "--all", action="store_true", help="include completed tasks")
     ls.add_argument("-t", "--tag", help="only tasks with this tag")
+    ls.add_argument("--json", action="store_true", help="print tasks as a JSON array")
     ls.add_argument("--overdue", action="store_true", help="only open tasks past their due date")
     ls.add_argument("--due-before", metavar="YYYY-MM-DD", help="only tasks due before this date")
 
@@ -70,13 +73,16 @@ def run(argv: list[str] | None = None) -> int:
             print(f"Added task {task.id}: {task.title}")
         elif args.command == "list":
             tasks = store.query(show_done=args.all, tag=args.tag, overdue=args.overdue, due_before=args.due_before)
-            if not tasks:
+            if args.json:
+                print(json.dumps([{**asdict(t), "overdue": t.is_overdue()} for t in tasks], indent=2))
+            elif not tasks:
                 if args.overdue or args.due_before:
                     print("No matching tasks.")
                 else:
                     print("No tasks. Add one with: todo add \"Buy groceries\"")
-            for task in tasks:
-                print(format_task(task))
+            if not args.json:
+                for task in tasks:
+                    print(format_task(task))
         elif args.command == "edit":
             if args.tag and args.clear_tags:
                 raise TodoError("use either --tag or --clear-tags, not both")

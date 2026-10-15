@@ -46,6 +46,8 @@ Cleared 1 completed task.
 
 `list --overdue` shows open tasks past their due date, and `list --due-before 2026-11-01` shows tasks due before that day (the day itself is excluded; tasks with no due date never match). They combine with `--tag` and `--all`.
 
+`list --json` prints the same filtered, sorted tasks as a JSON array (id, title, priority, due, done, tags, and a computed `overdue` flag) for scripts. An empty result is `[]`, never plain text.
+
 Tasks are stored in `~/.todo.json` by default. Use `--file path.json` or set `TODO_FILE` to point somewhere else.
 
 ## Tests
