@@ -40,6 +40,7 @@ def build_parser() -> argparse.ArgumentParser:
     ls = sub.add_parser("list", help="list tasks")
     ls.add_argument("-a", "--all", action="store_true", help="include completed tasks")
     ls.add_argument("-t", "--tag", help="only tasks with this tag")
+    ls.add_argument("-s", "--search", metavar="TEXT", help="only tasks whose title contains TEXT (ignores case)")
     ls.add_argument("--json", action="store_true", help="print tasks as a JSON array")
     ls.add_argument("--overdue", action="store_true", help="only open tasks past their due date")
     ls.add_argument("--due-before", metavar="YYYY-MM-DD", help="only tasks due before this date")
@@ -72,11 +73,11 @@ def run(argv: list[str] | None = None) -> int:
             store.save()
             print(f"Added task {task.id}: {task.title}")
         elif args.command == "list":
-            tasks = store.query(show_done=args.all, tag=args.tag, overdue=args.overdue, due_before=args.due_before)
+            tasks = store.query(show_done=args.all, tag=args.tag, overdue=args.overdue, due_before=args.due_before, text=args.search)
             if args.json:
                 print(json.dumps([{**asdict(t), "overdue": t.is_overdue()} for t in tasks], indent=2))
             elif not tasks:
-                if args.overdue or args.due_before:
+                if args.overdue or args.due_before or args.search:
                     print("No matching tasks.")
                 else:
                     print("No tasks. Add one with: todo add \"Buy groceries\"")

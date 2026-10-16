@@ -147,12 +147,15 @@ class TaskStore:
 
     def query(self, show_done: bool = False, tag: str | None = None,
               overdue: bool = False, due_before: str | None = None,
-              today: date | None = None) -> list[Task]:
+              today: date | None = None, text: str | None = None) -> list[Task]:
         """Open tasks first, then by priority (high first), due date, and id."""
         rank = {p: i for i, p in enumerate(reversed(PRIORITIES))}
         items = [t for t in self.tasks if show_done or not t.done]
         if tag:
             items = [t for t in items if tag.lower() in t.tags]
+        if text is not None and text.strip():
+            needle = text.strip().casefold()
+            items = [t for t in items if needle in t.title.casefold()]
         if overdue:
             items = [t for t in items if t.is_overdue(today)]
         if due_before is not None:

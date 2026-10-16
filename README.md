@@ -48,6 +48,8 @@ Cleared 1 completed task.
 
 `list --json` prints the same filtered, sorted tasks as a JSON array (id, title, priority, due, done, tags, and a computed `overdue` flag) for scripts. An empty result is `[]`, never plain text.
 
+`list -s bank` (or `--search bank`) keeps only tasks whose title contains that text, ignoring case. It combines with every other `list` option.
+
 Tasks are stored in `~/.todo.json` by default. Use `--file path.json` or set `TODO_FILE` to point somewhere else.
 
 ## Tests
