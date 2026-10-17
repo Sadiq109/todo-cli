@@ -60,6 +60,7 @@ def build_parser() -> argparse.ArgumentParser:
         p.add_argument("id", type=int)
 
     sub.add_parser("clear", help="delete all completed tasks")
+    sub.add_parser("stats", help="show counts: total, open, done, overdue")
     return parser
 
 
@@ -101,6 +102,10 @@ def run(argv: list[str] | None = None) -> int:
             task = store.remove(args.id)
             store.save()
             print(f"Removed task {task.id}: {task.title}")
+        elif args.command == "stats":
+            s = store.stats()
+            print(f"{s['total']} total, {s['open']} open, {s['done']} done, {s['overdue']} overdue")
+            print("open by priority: " + ", ".join(f"{p} {n}" for p, n in s["open_by_priority"].items()))
         elif args.command == "clear":
             count = store.clear_done()
             store.save()

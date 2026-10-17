@@ -140,6 +140,17 @@ class TaskStore:
         self.tasks.remove(task)
         return task
 
+    def stats(self, today: date | None = None) -> dict:
+        """Counts across the whole list: total, open, done, overdue, and open tasks per priority."""
+        open_tasks = [t for t in self.tasks if not t.done]
+        return {
+            "total": len(self.tasks),
+            "open": len(open_tasks),
+            "done": len(self.tasks) - len(open_tasks),
+            "overdue": sum(1 for t in open_tasks if t.is_overdue(today)),
+            "open_by_priority": {p: sum(1 for t in open_tasks if t.priority == p) for p in PRIORITIES},
+        }
+
     def clear_done(self) -> int:
         before = len(self.tasks)
         self.tasks = [t for t in self.tasks if not t.done]

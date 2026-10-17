@@ -6,7 +6,7 @@ I built this small command-line to-do list in Python. Tasks have priorities, opt
 
 ## Features
 
-- `add`, `list`, `edit`, `done`, `undo`, `remove` and `clear` commands
+- `add`, `list`, `edit`, `done`, `undo`, `remove`, `clear` and `stats` commands
 - Priorities (`low`, `medium`, `high`), due dates with overdue warnings, and tags
 - The list is sorted by open vs. done, then priority, then due date
 - Stable task ids that are never reused, even after you remove the newest task
@@ -40,6 +40,9 @@ $ todo list --all --tag school
   1 [x] Finish lab report  (high)  due 2026-10-02  #school
 $ todo clear
 Cleared 1 completed task.
+$ todo stats
+1 total, 1 open, 0 done, 0 overdue
+open by priority: low 0, medium 0, high 1
 ```
 
 `edit` changes only the fields you give and checks them all first, so a bad date never leaves a half-edited task. `--clear-due` removes the due date, `-t` replaces the tags, and `--clear-tags` removes them.
@@ -49,6 +52,8 @@ Cleared 1 completed task.
 `list --json` prints the same filtered, sorted tasks as a JSON array (id, title, priority, due, done, tags, and a computed `overdue` flag) for scripts. An empty result is `[]`, never plain text.
 
 `list -s bank` (or `--search bank`) keeps only tasks whose title contains that text, ignoring case. It combines with every other `list` option.
+
+`stats` prints a quick summary: total, open, done and overdue counts, plus how many open tasks sit at each priority. Completed tasks never count as overdue.
 
 Tasks are stored in `~/.todo.json` by default. Use `--file path.json` or set `TODO_FILE` to point somewhere else.
 
